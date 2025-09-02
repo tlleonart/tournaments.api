@@ -1,0 +1,35 @@
+{
+  "name": "tournaments-api",
+  "version": "1.0.0",
+  "description": "API de Torneos - Monorepo con Cloud Functions",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "deploy": "npm run deploy --workspaces --if-present",
+    "db:generate": "npm run db:generate -w @api/core-lib",
+    "db:migrate": "npm run db:migrate -w @api/core-lib",
+    "db:studio": "npm run db:studio -w @api/core-lib",
+    "clean": "rm -rf node_modules && npm install"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18",
+    "npm": ">=8"
+  }
+}
