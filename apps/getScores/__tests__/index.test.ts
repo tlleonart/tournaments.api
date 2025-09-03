@@ -1,11 +1,19 @@
 import { jest } from '@jest/globals';
 import { __setDbImpl, db as mockDb } from '@itbaf/tournaments-models';
-import { getScores } from '../src';
+
+let getScores: any;
+
+beforeAll(async () => {
+  await import('../src');
+  getScores = (globalThis as any).__getScores;
+});
 
 function createRes() {
   const res: any = {};
   res.status = jest.fn().mockReturnValue(res);
   res.json = jest.fn().mockReturnValue(res);
+  res.setHeader = jest.fn();
+  res.send = jest.fn().mockReturnValue(res);
   return res;
 }
 
@@ -24,6 +32,7 @@ describe('getScores', () => {
     __setDbImpl({ score: { findMany, count } });
 
     const req: any = {
+      method: 'GET',
       query: {
         page: '2',
         pageSize: '5',
@@ -50,8 +59,8 @@ describe('getScores', () => {
     });
     expect(count).toHaveBeenCalledWith({ where: { countryId: 7, tournamentEditionId: 9, userId: 'user-123' } });
 
-    expect(res.status).not.toHaveBeenCalled();
-    expect(res.json).toHaveBeenCalledWith({ items, total, page: 2, pageSize: 5 });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({ items, total, page: 2, pageSize: 5 });
   });
 
   test('returns 400 when validation fails (page < 1)', async () => {
@@ -59,7 +68,7 @@ describe('getScores', () => {
     const count = jest.fn();
     __setDbImpl({ score: { findMany, count } });
 
-    const req: any = { query: { page: '0' } };
+    const req: any = { method: 'GET', query: { page: '0' } };
     const res = createRes();
 
     await getScores(req, res);
@@ -75,7 +84,7 @@ describe('getScores', () => {
   test('returns 500 when db throws an error', async () => {
     __setDbImpl({ score: { findMany: ((jest.fn() as any).mockRejectedValue(new Error('db fail')) as any), count: (jest.fn() as any) } });
 
-    const req: any = { query: { page: '1', pageSize: '2' } };
+    const req: any = { method: 'GET', query: { page: '1', pageSize: '2' } };
     const res = createRes();
 
     // const originalError = console.error;
@@ -108,7 +117,7 @@ describe('getScores', () => {
     const req: any = { query: { userId: 'u1' } };
     const res = createRes();
 
-    await getScores(req, res);
+    await getScores({ ...req, method: 'GET' }, res);
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -117,5 +126,16 @@ describe('getScores', () => {
         take: 20,
       })
     );
+  });
+
+  test('returns 405 and sets Allow header when method is not GET', async () => {
+    const req: any = { query: {}, method: 'POST' };
+    const res = createRes();
+
+    await getScores(req, res);
+
+    expect(res.setHeader).toHaveBeenCalledWith('Allow', 'GET');
+    expect(res.status).toHaveBeenCalledWith(405);
+    expect(res.send).toHaveBeenCalledWith({ error: 'Method not allowed' });
   });
 });
