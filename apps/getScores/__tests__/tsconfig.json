@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    "outDir": "dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "typeRoots": ["../types", "../../node_modules/@types"],
+    "types": ["jest", "node"],
+    "baseUrl": "..",
+    "paths": {
+      "@itbaf/tournaments-models": ["__mocks__/tournaments-models.ts"]
+    }
+  },
+  "include": [
+    "src/index.ts",
+    "__tests__/**/*.ts",
+    "__mocks__/**/*.ts",
+    "types/**/*.d.ts"
+  ]
+}
