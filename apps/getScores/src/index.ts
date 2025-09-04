@@ -13,42 +13,42 @@ const QueryDto = z.object({
 
 
 export const getScores = async (req: Request, res: Response) => {
-    try {
-        if (req.method === 'GET') {
-            const parsed = QueryDto.safeParse(req.query);
-            if (!parsed.success) {
-                 res.status(400).json({ error: parsed.error.flatten() });
+        try {
+            if (req.method === 'GET') {
+                const parsed = QueryDto.safeParse(req.query);
+                if (!parsed.success) {
+                    res.status(400).json({ error: parsed.error.flatten() });
+                } else {
+                    const { page, pageSize, countryId, tournamentEditionId, userId } = parsed.data;
+                    const where: any = {};
+                    if (countryId) where.countryId = countryId;
+                    if (tournamentEditionId) where.tournamentEditionId = tournamentEditionId;
+                    if (userId) where.userId = userId;
+                    const [items, total] = await Promise.all([
+                        db().score.findMany({
+                            where,
+                            skip: (page - 1) * pageSize,
+                            take: pageSize,
+                            orderBy: [{ amount: "desc" }, { playTime: "asc" }],
+                            include: {
+                                country: true,
+                                edition: { include: { scoreCriteria: true, tournaments: true } },
+                            }
+                        }),
+                        db().score.count({ where })
+                    ]);
+                    res.status(200).send({items, total, page, pageSize });
+                }
             } else {
-                const { page, pageSize, countryId, tournamentEditionId, userId } = parsed.data;
-                const where: any = {};
-                if (countryId) where.countryId = countryId;
-                if (tournamentEditionId) where.tournamentEditionId = tournamentEditionId;
-                if (userId) where.userId = userId;
-                const [items, total] = await Promise.all([
-                    db().score.findMany({
-                        where,
-                        skip: (page - 1) * pageSize,
-                        take: pageSize,
-                        orderBy: [{ amount: "desc" }, { playTime: "asc" }],
-                        include: {
-                            country: true,
-                            edition: { include: { scoreCriteria: true, tournaments: true } },
-                        }
-                    }),
-                    db().score.count({ where })
-                ]);
-                res.status(200).send({items, total, page, pageSize });
+                res.setHeader('Allow', 'GET');
+                res.status(405).send({error: 'Method not allowed'});
             }
-        } else {
-            res.setHeader('Allow', 'GET');
-            res.status(405).send({error: 'Method not allowed'});
-        }
 
-    } catch (err: any) {
-        console.error(err);
-        res.status(500).json({ error: "internal_error", detail: err?.message });
+        } catch (err: any) {
+            console.error(err);
+            res.status(500).json({ error: "internal_error", detail: err?.message });
+        }
     }
-}
 
 // expose handler for tests without exporting
 ;(globalThis as any).__getScores = getScores;
