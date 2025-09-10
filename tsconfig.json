@@ -5,15 +5,11 @@
     "lib": ["ES2022"],
     "outDir": "./dist",
     "rootDir": "./",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "removeComments": true,
+    "strict": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
@@ -23,20 +19,47 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": false,
     "noUncheckedIndexedAccess": true,
-    
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
       "@api/core-lib": ["./packages/core-lib/src/index"],
-      "@api/core-lib/*": ["./packages/core-lib/src/*"]
-    }
+      "@api/core-lib/*": ["./packages/core-lib/src/*"],
+      "@api/get-scores": ["./apps/getScores/src/index"],
+      "@api/set-scores": ["./apps/setScores/src/index"]
+    },
+    "importHelpers": true,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowJs": false,
+    "checkJs": false
   },
+  
+  "include": [
+    "packages/**/*",
+    "apps/**/*",
+    "*.ts"
+  ],
+  
   "exclude": [
     "node_modules",
     "dist",
+    "coverage",
     "**/*.test.ts",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "**/__tests__/**",
+    "**/__mocks__/**",
+    "**/jest.config.*"
   ],
+  
   "ts-node": {
-    "esm": true
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
   }
 }
